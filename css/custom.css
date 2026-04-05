@@ -1,0 +1,651 @@
+/* 页面整体更柔和 */
+body {
+  letter-spacing: 0.2px;
+}
+
+/* 导航栏毛玻璃 */
+.navbar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(30, 30, 40, 0.45) !important;
+}
+
+/* 导航文字和图标改成白色 */
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .iconfont,
+.navbar .navbar-toggler {
+  color: #fff !important;
+}
+
+/* hover 稍微亮一点 */
+.navbar .nav-link:hover,
+.navbar .navbar-brand:hover {
+  color: #ffd6f2 !important;
+}
+
+/* 首页卡片更圆 */
+.index-card,
+.card,
+.post-content {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+/* 文章正文更舒服 */
+.markdown-body {
+  line-height: 1.9;
+  font-size: 1.02rem;
+}
+
+/* 链接悬停有一点动效 */
+a {
+  transition: all 0.25s ease;
+}
+a:hover {
+  opacity: 0.82;
+  text-decoration: none;
+}
+
+/* 首页标题更轻一点 */
+.banner .page-header h1 {
+  letter-spacing: 1px;
+}
+
+/* 图片圆角 */
+img {
+  border-radius: 12px;
+}
+
+/* 代码块圆角 */
+figure.highlight,
+pre {
+  border-radius: 14px;
+}
+/* 顶栏动画 */
+#navbar {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 隐藏状态 */
+#navbar.navbar-hide {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+/* 首页文章封面完整显示 */
+.index-img img,
+.post-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  object-position: center center;
+  background-color: #1f2937;
+}
+/* 分隔符 */
+.divider {
+  margin: 0 8px;
+}
+
+/* ===== 动态打字效果 ===== */
+.typing {
+  font-size: 14px;
+  color: #ffd6f2;
+  min-height: 18px;
+}
+
+/* 光标 */
+.typing::after {
+  content: "|";
+  margin-left: 4px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ===== 全局特效层 ===== */
+#global-fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* 飘落元素 */
+.falling-item {
+  position: fixed;
+  top: -10vh;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.75;
+  animation-name: fallDown, swaySide;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+@keyframes fallDown {
+  from {
+    transform: translateY(-10vh) rotate(0deg);
+  }
+  to {
+    transform: translateY(110vh) rotate(360deg);
+  }
+}
+
+@keyframes swaySide {
+  0% {
+    margin-left: 0;
+  }
+  50% {
+    margin-left: 22px;
+  }
+  100% {
+    margin-left: 0;
+  }
+}
+
+/* ===== 自定义底部区域 ===== */
+.anime-footer-wrap {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: 48px;
+  padding: 36px 0 28px;
+}
+
+/* 自定义底部整体：真正放在页面最下方 */
+.anime-footer-wrap {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: 48px;
+  padding: 24px 0 28px;
+}
+
+/* footer 卡片更宽 */
+.anime-footer {
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 28px 24px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    background-color 0.25s ease, color 0.25s ease;
+}
+
+/* 浅色模式 */
+.anime-footer {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 230, 240, 0.72),
+    rgba(220, 235, 255, 0.72)
+  );
+  color: #5a6170;
+}
+
+/* 夜间模式 */
+[data-default-color-scheme="dark"] .anime-footer,
+html.dark .anime-footer,
+body.dark .anime-footer {
+  background: linear-gradient(
+    135deg,
+    rgba(43, 49, 68, 0.78),
+    rgba(28, 39, 61, 0.78)
+  );
+  color: #c9d1e3;
+}
+
+/* 每行文字 */
+.footer-line {
+  margin: 7px 0;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+}
+
+.footer-line.small {
+  font-size: 12px;
+  opacity: 0.82;
+}
+
+.divider {
+  margin: 0 8px;
+  opacity: 0.6;
+}
+
+/* 浅色模式 */
+.anime-footer {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 230, 240, 0.72),
+    rgba(220, 235, 255, 0.72)
+  );
+  color: #5a6170;
+}
+
+/* 夜间模式 */
+[data-default-color-scheme="dark"] .anime-footer,
+html.dark .anime-footer,
+body.dark .anime-footer {
+  background: linear-gradient(
+    135deg,
+    rgba(43, 49, 68, 0.78),
+    rgba(28, 39, 61, 0.78)
+  );
+  color: #c9d1e3;
+}
+
+/* 每一行 */
+.footer-line {
+  margin: 7px 0;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+}
+
+.footer-line.small {
+  font-size: 12px;
+  opacity: 0.82;
+}
+
+.divider {
+  margin: 0 8px;
+  opacity: 0.6;
+}
+
+/* 打字效果 */
+.typing {
+  min-height: 20px;
+  font-weight: 600;
+  color: #d47aa7;
+}
+
+[data-default-color-scheme="dark"] .typing,
+html.dark .typing,
+body.dark .typing {
+  color: #f0b8da;
+}
+
+.typing::after {
+  content: "|";
+  margin-left: 4px;
+  animation: typingBlink 1s infinite;
+}
+
+@keyframes typingBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 小猫 */
+.footer-cat {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: default;
+  transition: transform 0.25s ease, filter 0.25s ease;
+  transform-origin: center bottom;
+}
+
+/* hover 动画 */
+.footer-cat:hover {
+  animation: catBounce 0.6s ease;
+  filter: drop-shadow(0 4px 12px rgba(255, 170, 210, 0.35));
+}
+
+@keyframes catBounce {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-8deg) scale(1.08);
+  }
+  50% {
+    transform: translateY(0) rotate(8deg) scale(1.04);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-4deg) scale(1.06);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+/* footer 轻微悬浮 */
+.anime-footer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
+}
+
+/* 避免特效挡住内容 */
+#board,
+.container.nopadding-x-md {
+  position: relative;
+  z-index: 2;
+}
+
+/* 返回顶部按钮保持更高层 */
+#scroll-top-button,
+#scroll-top-btn,
+#scroll-top {
+  z-index: 10;
+}
+/* ===== 顶栏更贴近左右两边 ===== */
+.navbar .container {
+  max-width: 96% !important;
+  width: 96% !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+/* 左侧标题不要离左边太远 */
+.navbar-brand {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* 右侧菜单整体往右靠 */
+.navbar-nav {
+  margin-left: auto !important;
+}
+
+/* 菜单项间距稍微紧一点，更利落 */
+.navbar .nav-item {
+  margin-left: 0.35rem;
+  margin-right: 0.35rem;
+}
+/* ===== 首页主内容区域更宽 ===== */
+.index #board,
+.page #board,
+.archive #board,
+.category #board,
+.tag #board {
+  max-width: 1320px !important;
+  width: calc(100% - 48px) !important;
+}
+/* ===== 首页文章卡片更宽更舒展 ===== */
+.index .index-card {
+  max-width: 1180px !important;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+}
+
+/* 封面图区域稍微加宽 */
+.index .index-card .index-img {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  height: 180px !important;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+/* 封面图展示更完整 */
+.index .index-card .index-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #1f2937;
+  object-position: center center;
+}
+
+/* 右侧文字区域更宽 */
+.index .index-card .media-body,
+.index .index-card .index-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 标题和摘要排版更舒服 */
+.index .index-card .index-header,
+.index .index-card .index-excerpt {
+  max-width: 100%;
+}
+/* 隐藏 Fluid 默认 footer */
+footer.footer,
+#footer,
+.footer-content {
+  display: none !important;
+}
+.falling-item {
+  filter: blur(0.3px);
+}
+/* ===== 页面角落小猫 ===== */
+/* ===== SVG 小猫 ===== */
+#corner-cat {
+  position: fixed;
+  left: 20px;
+  bottom: 22px;
+  z-index: 12;
+  user-select: none;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: left 0.2s linear;
+}
+
+.cat-svg-wrap {
+  width: 92px;
+  height: 60px;
+  transform-origin: center bottom;
+}
+
+.cat-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  color: #4c5566;
+  overflow: visible;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.14));
+}
+
+[data-default-color-scheme="dark"] .cat-svg,
+html.dark .cat-svg,
+body.dark .cat-svg {
+  color: #dce6f7;
+  filter: drop-shadow(0 4px 12px rgba(180, 210, 255, 0.12));
+}
+
+.cat-eye,
+.cat-mouth,
+.cat-whisker,
+.cat-leg {
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
+}
+
+[data-default-color-scheme="dark"] .cat-eye,
+[data-default-color-scheme="dark"] .cat-mouth,
+[data-default-color-scheme="dark"] .cat-whisker,
+[data-default-color-scheme="dark"] .cat-leg,
+html.dark .cat-eye,
+html.dark .cat-mouth,
+html.dark .cat-whisker,
+html.dark .cat-leg,
+body.dark .cat-eye,
+body.dark .cat-mouth,
+body.dark .cat-whisker,
+body.dark .cat-leg {
+  stroke: #1b2333;
+}
+
+/* 静止时呼吸 */
+#corner-cat.idle .cat-body-main {
+  animation: catBreath 2.4s ease-in-out infinite;
+}
+
+/* 走路时身体起伏 */
+#corner-cat.walking .cat-body-main {
+  animation: catWalkBounce 0.42s ease-in-out infinite;
+}
+
+/* 向左时翻转 */
+#corner-cat.face-left .cat-svg-wrap {
+  transform: scaleX(-1);
+}
+
+/* 尾巴 */
+.cat-tail {
+  transform-origin: 112px 54px;
+  animation: catTail 1.2s ease-in-out infinite;
+}
+
+#corner-cat.walking .cat-tail {
+  animation: catTailFast 0.55s ease-in-out infinite;
+}
+
+/* 眨眼 */
+.left-eye,
+.right-eye {
+  animation: catBlink 4.5s infinite;
+}
+
+/* 腿 */
+#corner-cat.walking .cat-legs .cat-leg:nth-child(1),
+#corner-cat.walking .cat-legs .cat-leg:nth-child(3) {
+  animation: legMoveA 0.42s ease-in-out infinite;
+}
+
+#corner-cat.walking .cat-legs .cat-leg:nth-child(2),
+#corner-cat.walking .cat-legs .cat-leg:nth-child(4) {
+  animation: legMoveB 0.42s ease-in-out infinite;
+}
+
+/* hover 开心一点 */
+#corner-cat:hover .cat-svg-wrap {
+  animation: catHappy 0.6s ease;
+}
+
+#corner-cat:hover .cat-mouth {
+  d: path("M39 49 Q41.5 53 44 49");
+}
+
+@keyframes catBreath {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes catWalkBounce {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes catTail {
+  0% { transform: rotate(8deg); }
+  50% { transform: rotate(-6deg); }
+  100% { transform: rotate(8deg); }
+}
+
+@keyframes catTailFast {
+  0% { transform: rotate(14deg); }
+  50% { transform: rotate(-10deg); }
+  100% { transform: rotate(14deg); }
+}
+
+@keyframes catBlink {
+  0%, 44%, 48%, 100% {
+    transform: scaleY(1);
+    transform-origin: center;
+  }
+  46% {
+    transform: scaleY(0.15);
+    transform-origin: center;
+  }
+}
+
+@keyframes legMoveA {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes legMoveB {
+  0% { transform: translateY(2px); }
+  50% { transform: translateY(0); }
+  100% { transform: translateY(2px); }
+}
+
+@keyframes catHappy {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.08) rotate(-4deg); }
+  60% { transform: scale(1.06) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@media (max-width: 768px) {
+  #corner-cat {
+    left: 10px;
+    bottom: 12px;
+  }
+
+  .cat-svg-wrap {
+    width: 74px;
+    height: 50px;
+  }
+}
+
+@keyframes catWalk {
+  0% { transform: translateY(0) rotate(0deg) scaleX(1); }
+  25% { transform: translateY(-2px) rotate(-3deg) scaleX(1); }
+  50% { transform: translateY(0) rotate(2deg) scaleX(1); }
+  75% { transform: translateY(-1px) rotate(-2deg) scaleX(1); }
+  100% { transform: translateY(0) rotate(0deg) scaleX(1); }
+}
+
+@keyframes catWalkLeft {
+  0% { transform: translateY(0) rotate(0deg) scaleX(-1); }
+  25% { transform: translateY(-2px) rotate(3deg) scaleX(-1); }
+  50% { transform: translateY(0) rotate(-2deg) scaleX(-1); }
+  75% { transform: translateY(-1px) rotate(2deg) scaleX(-1); }
+  100% { transform: translateY(0) rotate(0deg) scaleX(-1); }
+}
+
+@keyframes catPause {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1px) rotate(-2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* 不要挡住返回顶部按钮 */
+#scroll-top-button,
+#scroll-top-btn,
+#scroll-top {
+  z-index: 20;
+}
+
+/* 小屏幕缩小一点 */
+@media (max-width: 768px) {
+  #corner-cat {
+    left: 12px;
+    bottom: 12px;
+  }
+
+  #corner-cat .cat-body {
+    font-size: 20px;
+  }
+}
+#corner-cat:hover .cat-body {
+  transform: scale(1.12);
+}
