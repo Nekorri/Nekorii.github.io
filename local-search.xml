@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>xxe</title>
+    <link href="/2026/04/07/xxe/"/>
+    <url>/2026/04/07/xxe/</url>
+    
+    <content type="html"><![CDATA[<h2 id="XXE前置知识-部分资料借鉴于XXE漏洞学习-Suzen"><a href="#XXE前置知识-部分资料借鉴于XXE漏洞学习-Suzen" class="headerlink" title="XXE前置知识(部分资料借鉴于XXE漏洞学习 - Suzen)"></a>XXE前置知识(部分资料借鉴于<a href="https://yschen20.github.io/2025/10/04/XXE%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0/">XXE漏洞学习 - Suzen</a>)</h2><p>​XXE 是一种 XML 外部实体注入漏洞。当应用程序解析用户提交的 XML 时，如果启用了外部实体解析，并且没有正确过滤或限制，攻击者可以通过定义外部实体来读取服务器本地文件发起 SSRF 等。</p><p>​1.基础的xxe利用方式</p><p>基础文件读取（有回显）</p><p>原理：通过定义外部实体引用本地文件（如 &#x2F;etc&#x2F;passwd），当 XML 被解析且内容被回显时，文件内容会直接出现在响应中。</p><p>前提：后端解析 XML 并将字段内容返回给用户。</p><p>用途：读取敏感文件（配置密码flag 等）。</p><p>​2.Base64 编码绕过</p><p>原理：利用 PHP 的 php:&#x2F;&#x2F;filter 流包装器，在读取文件时自动进行 Base64 编码，避免明文内容触发关键词过滤（如flag）。</p><p>前提：后端使用 PHP 且支持流包装器。</p><p>用途：绕过输出内容中的敏感词检测。</p><p>​3.带外数据外传（OOB - Out-of-Band）</p><p>原理：当服务器不回显解析结果时，通过构造恶意 DTD 文件，让目标服务器在解析过程中主动向攻击者控制的服务器发起 HTTP 或 DNS 请求，并将文件内容嵌入请求的 URL 或子域名中。</p><p>前提：目标允许外联（可访问互联网或内网特定服务）。</p><p>用途：在无回显场景下窃取数据。</p><p>​4.XInclude 注入</p><p>原理：利用 XML 标准中的 XInclude 功能动态包含外部资源，无需声明 DOCTYPE 或 ENTITY，从而绕过基于 DTD 的检测规则。</p><p>前提：后端 XML 解析器支持并启用了 XInclude（如 JavaPython lxml）。</p><p>用途：在严格过滤 &amp;amp;lt;!DOCTYPE 的环境中实现文件读取。</p><p>​5.SSRF（服务端请求伪造）</p><p>原理：通过 http:&#x2F;&#x2F; 或 https:&#x2F;&#x2F; 协议的外部实体，让服务器向内网或第三方服务发起请求。</p><p>前提：解析器允许网络协议。</p><p>用途：探测内网服务（如云元数据接口 169.254.169.254）攻击内部系统。</p><p>​6.源码泄露（PHP 环境）</p><p>原理：使用 php:&#x2F;&#x2F;filter 读取 PHP 源文件而不执行，获取应用逻辑硬编码凭证或真实 flag 路径。</p><p>前提：目标为 PHP 应用。</p><p>用途：辅助进一步攻击或直接获取 flag。</p><p>​7.命令执行（极少见）</p><p>原理：在 PHP 启用了危险的 expect 模块时，可通过 expect:&#x2F;&#x2F; 协议执行系统命令。</p><p>前提：expect 扩展启用（默认不安装）。</p><p>用途：远程代码执行（RCE），但现实中几乎不可用。</p><p>​8.WAF 绕过技巧（混淆与编码）</p><p>原理：通过大小写变换Unicode 实体编码协议变种等方式，绕过基于字符串匹配的 Web 应用防火墙（WAF）。</p><p>前提：WAF 规则简单，未做语义分析。</p><p>用途：使标准 payload 不被拦截。</p><p>​9.二次注入 &#x2F; 嵌套实体（进阶 OOB）</p><p>原理：在外部 DTD 中动态构造新的实体，实现多阶段解析，将文件内容拼接到外联请求中。</p><p>前提：支持参数实体和嵌套引用。</p><p>用途：实现更隐蔽更可靠的 OOB 数据外传。</p><h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>首先我们都得有一个最基础的框架：</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;utf-8&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">root</span>&gt;</span><br><br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>学习笔记</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>XEE漏洞</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>记一次xss漏洞的学习和好靶场的刷题日志</title>
     <link href="/2026/04/05/xss/"/>
     <url>/2026/04/05/xss/</url>
@@ -70,13 +95,13 @@
     
     <tags>
       
-      <tag>wp/sum</tag>
-      
       <tag>SSRF漏洞</tag>
       
       <tag>Pickle反序列化</tag>
       
       <tag>jwt密钥伪造</tag>
+      
+      <tag>wp/sum</tag>
       
     </tags>
     
